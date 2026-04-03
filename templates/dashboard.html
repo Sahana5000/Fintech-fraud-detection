@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            margin: 0;
+        }
+
+        .container {
+            width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .cards {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card {
+            width: 22%;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+        }
+
+        .total { background: #3498db; }
+        .approved { background: #2ecc71; }
+        .warning { background: #f39c12; }
+        .blocked { background: #e74c3c; }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>📊 Dashboard</h2>
+
+<div class="cards">
+    <div class="card total">Total<br>{{ total }}</div>
+    <div class="card approved">Approved<br>{{ approved }}</div>
+    <div class="card warning">Warning<br>{{ warning }}</div>
+    <div class="card blocked">Blocked<br>{{ blocked }}</div>
+</div>
+
+<canvas id="chart"></canvas>
+
+<br>
+<a href="/">⬅ Back</a>
+
+</div>
+
+<script>
+new Chart(document.getElementById('chart'), {
+    type: 'bar',
+    data: {
+        labels: ['Approved', 'Warning', 'Blocked'],
+        datasets: [{
+            data: [{{ approved }}, {{ warning }}, {{ blocked }}],
+            backgroundColor: ['green','orange','red']
+        }]
+    }
+});
+</script>
+
+</body>
+</html>

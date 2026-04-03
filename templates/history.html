@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transaction History</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            width: 90%;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            text-align: center;
+            color: #2a5298;
+        }
+
+        .health {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            background: #f9f9f9;
+            border-left: 6px solid {{ health_color }};
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #2a5298;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+
+        .APPROVED { color: #28a745; font-weight: bold; }
+        .WARNING  { color: #f39c12; font-weight: bold; }
+        .BLOCKED  { color: #dc3545; font-weight: bold; }
+
+        .LOW    { color: #28a745; font-weight: bold; }
+        .MEDIUM { color: #f39c12; font-weight: bold; }
+        .HIGH   { color: #dc3545; font-weight: bold; }
+
+        .no-data {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        canvas {
+            margin-top: 20px;
+        }
+
+        .buttons {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            margin: 5px;
+            display: inline-block;
+        }
+
+        .download { background: #17a2b8; }
+        .back { background: #6c757d; }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>📜 Transaction History & Risk Trend</h2>
+
+    <!-- HEALTH CARD -->
+    <div class="health">
+        <h3>
+            Security Health:
+            <span style="color:{{ health_color }}">
+                {{ health_status }}
+            </span>
+        </h3>
+
+        <p>Total Transactions: <b>{{ total_tx }}</b></p>
+        <p>Blocked: <b>{{ blocked_tx }}</b></p>
+        <p>Warnings: <b>{{ warning_tx }}</b></p>
+    </div>
+
+    {% if user_id %}
+        <p><strong>User:</strong> {{ user_id }}</p>
+    {% endif %}
+
+    {% if transactions|length == 0 %}
+        <p class="no-data">No transactions found</p>
+    {% else %}
+
+    <!-- CHART -->
+    <canvas id="riskChart"></canvas>
+
+    <!-- TABLE -->
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Amount</th>
+            <th>Receiver</th>
+            <th>Status</th>
+            <th>Risk Score</th>
+            <th>Risk Level</th>
+            <th>Time</th>
+        </tr>
+
+        {% for tx in transactions %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ tx.get('amount', '-') }}</td>
+            <td>{{ tx.get('receiver', 'N/A') }}</td>
+            <td class="{{ tx.get('status') }}">{{ tx.get('status') }}</td>
+            <td>{{ tx.get('risk_score', 0) }}</td>
+            <td class="{{ tx.get('risk_level') }}">{{ tx.get('risk_level') }}</td>
+            <td>{{ tx.get('timestamp') }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- CHART SCRIPT -->
+    <script>
+        const riskScores = [
+            {% for tx in transactions %}
+                {{ tx.get('risk_score', 0) }},
+            {% endfor %}
+        ];
+
+        const labels = riskScores.map((_, i) => "Tx " + (i + 1));
+
+        new Chart(document.getElementById('riskChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Risk Score Trend',
+                    data: riskScores,
+                    borderColor: '#ff4d4d',
+                    backgroundColor: 'rgba(255,77,77,0.2)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    </script>
+
+    {% endif %}
+
+    <!-- BUTTONS -->
+    <div class="buttons">
+
+        {% if user_id %}
+        <a href="/download_csv?user_id={{ user_id }}" class="btn download">
+            ⬇️ Download CSV
+        </a>
+        {% endif %}
+
+        <a href="/?user_id={{ user_id }}" class="btn back">
+            ⬅ Back
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

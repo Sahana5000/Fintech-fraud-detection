@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FinTech Guard</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            margin: 0;
+        }
+
+        .container {
+            width: 420px;
+            margin: 60px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c5364;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 12px;
+        }
+
+        .APPROVED { background: #e8f5e9; border-left: 6px solid #2ecc71; }
+        .WARNING { background: #fff8e1; border-left: 6px solid #f39c12; }
+        .BLOCKED { background: #fdecea; border-left: 6px solid #e74c3c; }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .actions a {
+            flex: 1;
+        }
+
+        .actions button {
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .secondary { background: #6c757d; }
+        .history { background: #17a2b8; }
+        .dashboard { background: #28a745; }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>💳 FinTech Guard</h2>
+
+    <form method="POST" action="/check">
+        <input type="text" name="user_id" placeholder="User ID" value="{{ user_id }}" required>
+        <input type="number" name="amount" placeholder="Amount" required>
+
+        <select name="receiver" required>
+            <option value="">Receiver</option>
+            <option value="known">Known</option>
+            <option value="unknown">Unknown</option>
+        </select>
+
+        <select name="location" required>
+            <option value="">Location</option>
+            <option value="same">Same</option>
+            <option value="new">New</option>
+        </select>
+
+        <button>🔍 Check Payment</button>
+    </form>
+
+    {% if status %}
+    <div class="result {{ status }}">
+        <p><b>Status:</b> {{ status }}</p>
+        <p><b>Message:</b> {{ message }}</p>
+        <p><b>Risk Score:</b> {{ risk_score }}</p>
+        <p><b>Risk Level:</b> {{ risk_level }}</p>
+        <p><b>ML Probability:</b> {{ ml_score }}%</p>
+
+        <ul>
+            {% for r in reasons %}
+            <li>{{ r }}</li>
+            {% endfor %}
+        </ul>
+
+        <div class="actions">
+            <a href="/"><button class="secondary">🔄 New</button></a>
+            <a href="/history?user_id={{ user_id }}"><button class="history">📜 History</button></a>
+            <a href="/dashboard"><button class="dashboard">📊 Dashboard</button></a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
